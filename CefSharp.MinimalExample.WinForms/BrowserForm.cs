@@ -44,6 +44,13 @@ namespace CefSharp.MinimalExample.WinForms
 
             toolStripContainer.ContentPanel.Controls.Add(browser);
 
+            browser.IsBrowserInitializedChanged += OnIsBrowserInitializedChanged;
+            browser.LoadingStateChanged += OnLoadingStateChanged;
+            browser.ConsoleMessage += OnBrowserConsoleMessage;
+            browser.StatusMessage += OnBrowserStatusMessage;
+            browser.TitleChanged += OnBrowserTitleChanged;
+            browser.AddressChanged += OnBrowserAddressChanged;
+
             var bitness = Environment.Is64BitProcess ? "x64" : "x86";
             var version = String.Format("Chromium: {0}, CEF: {1}, CefSharp: {2}, Environment: {3}", Cef.ChromiumVersion, Cef.CefVersion, Cef.CefSharpVersion, bitness);
             DisplayOutput(version);
@@ -64,7 +71,63 @@ namespace CefSharp.MinimalExample.WinForms
             e.FullPath = Path.Combine("D:\\Tests", e.SuggestedFileName);//This doesn't get triggered.
         }
 
-        //Following code seems to interfere with the execution of JavaScript when uncommented.
+        //Following commented code seems to interfere with the execution of JavaScript when uncommented.
+        private void OnIsBrowserInitializedChanged(object sender, EventArgs e)
+        {
+            var b = ((ChromiumWebBrowser)sender);
+
+            this.InvokeOnUiThreadIfRequired(() => b.Focus());
+        }
+
+        private void OnBrowserConsoleMessage(object sender, ConsoleMessageEventArgs args)
+        {
+            DisplayOutput(string.Format("Line: {0}, Source: {1}, Message: {2}", args.Line, args.Source, args.Message));
+        }
+
+        private void OnBrowserStatusMessage(object sender, StatusMessageEventArgs args)
+        {
+            this.InvokeOnUiThreadIfRequired(() => statusLabel.Text = args.Value);
+        }
+
+        private void OnLoadingStateChanged(object sender, LoadingStateChangedEventArgs args)
+        {
+            SetCanGoBack(args.CanGoBack);
+            SetCanGoForward(args.CanGoForward);
+
+            this.InvokeOnUiThreadIfRequired(() => SetIsLoading(!args.CanReload));
+        }
+
+        private void OnBrowserTitleChanged(object sender, TitleChangedEventArgs args)
+        {
+            this.InvokeOnUiThreadIfRequired(() => Text = args.Title);
+        }
+
+        private void OnBrowserAddressChanged(object sender, AddressChangedEventArgs args)
+        {
+            this.InvokeOnUiThreadIfRequired(() => urlTextBox.Text = args.Address);
+        }
+
+        private void SetCanGoBack(bool canGoBack)
+        {
+            this.InvokeOnUiThreadIfRequired(() => backButton.Enabled = canGoBack);
+        }
+
+        private void SetCanGoForward(bool canGoForward)
+        {
+            this.InvokeOnUiThreadIfRequired(() => forwardButton.Enabled = canGoForward);
+        }
+
+        private void SetIsLoading(bool isLoading)
+        {
+            goButton.Text = isLoading ?
+                "Stop" :
+                "Go";
+            goButton.Image = isLoading ?
+                Properties.Resources.nav_plain_red :
+                Properties.Resources.nav_plain_green;
+
+            HandleToolStripLayout();
+        }
 
         public void DisplayOutput(string output)
         {
@@ -98,7 +161,14 @@ namespace CefSharp.MinimalExample.WinForms
 
         private void GoButtonClick(object sender, EventArgs e)
         {
-            LoadUrl(urlTextBox.Text);
+            if(links!=null && links.Count > 0)
+            {
+                LoadUrl(links[0].href);
+            }
+            else
+            {
+                LoadUrl(urlTextBox.Text);
+            }
         }
 
         private void BackButtonClick(object sender, EventArgs e)
