@@ -71,6 +71,9 @@
       <DependentUpon>BrowserForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Controls\ControlExtensions.cs" />
+    <Compile Include="Handlers\DownloadHandler.cs" />
+    <Compile Include="Handlers\Links.cs" />
+    <Compile Include="Handlers\RenderProcessMessageHandler.cs" />
     <Compile Include="Program.cs">
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />

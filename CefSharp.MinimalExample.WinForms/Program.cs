@@ -14,6 +14,8 @@ namespace CefSharp.MinimalExample.WinForms
         [STAThread]
         public static void Main()
         {
+            CefSharpSettings.LegacyJavascriptBindingEnabled = true;
+            CefSharpSettings.ShutdownOnExit = false;
             //Monitor parent process exit and close subprocesses if parent process exits first
             //This will at some point in the future becomes the default
             CefSharpSettings.SubprocessExitIfParentProcessClosed = true;
