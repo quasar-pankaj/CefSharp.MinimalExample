@@ -71,7 +71,6 @@ namespace CefSharp.MinimalExample.WinForms
             e.FullPath = Path.Combine("D:\\Tests", e.SuggestedFileName);//This doesn't get triggered.
         }
 
-        //Following commented code seems to interfere with the execution of JavaScript when uncommented.
         private void OnIsBrowserInitializedChanged(object sender, EventArgs e)
         {
             var b = ((ChromiumWebBrowser)sender);
